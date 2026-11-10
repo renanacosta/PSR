@@ -13,11 +13,12 @@ function sendStatus() {
 async function captureClick(event) {
     if (!isRecording || !mainWindow || mainWindow.isDestroyed()) return
 
+    const point = screen.getCursorScreenPoint()
     const bounds = mainWindow.getBounds()
-    if (event.x >= bounds.x && event.x < bounds.x + bounds.width && event.y >= bounds.y && event.y < bounds.y + bounds.height) return
+    if (point.x >= bounds.x && point.x < bounds.x + bounds.width && point.y >= bounds.y && point.y < bounds.y + bounds.height) return
 
     try {
-        const display = screen.getDisplayNearestPoint({ x: event.x, y: event.y })
+        const display = screen.getDisplayNearestPoint(point)
         const sources = await desktopCapturer.getSources({
             types: ['screen'],
             thumbnailSize: { width: 1600, height: 1000 },
@@ -37,8 +38,8 @@ async function captureClick(event) {
                 height: display.bounds.height,
             },
             click: {
-                x: Math.max(0, Math.min(1, (event.x - display.bounds.x) / display.bounds.width)),
-                y: Math.max(0, Math.min(1, (event.y - display.bounds.y) / display.bounds.height)),
+                x: Math.max(0, Math.min(1, (point.x - display.bounds.x) / display.bounds.width)),
+                y: Math.max(0, Math.min(1, (point.y - display.bounds.y) / display.bounds.height)),
                 button: event.button === 2 ? 'direito' : event.button === 3 ? 'meio' : 'esquerdo',
             },
             note: '',
