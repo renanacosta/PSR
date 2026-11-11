@@ -16889,6 +16889,8 @@ function App() {
   const [selectedId, setSelectedId] = reactExports.useState(null);
   const [notice, setNotice] = reactExports.useState("");
   const selectedStep = steps.find((step) => step.id === selectedId) ?? steps.at(-1);
+  const selectedImageSize = selectedStep?.imageSize ?? selectedStep?.display;
+  const screenshotAspectRatio = selectedImageSize ? selectedImageSize.width / selectedImageSize.height : 1;
   reactExports.useEffect(() => {
     const removeStepListener = window.psr.onStep((step) => {
       setSteps((current) => [...current, { ...step, name: `Etapa ${step.number ?? current.length + 1}` }]);
@@ -17067,8 +17069,20 @@ function App() {
           ] }),
           selectedStep ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "screenshot-frame", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("img", { className: "screenshot-image", src: selectedStep.image, alt: `Captura da etapa ${steps.indexOf(selectedStep) + 1}` }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "click-marker", style: { left: `${selectedStep.click.x * 100}%`, top: `${selectedStep.click.y * 100}%` }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MousePointer2, { size: 17, fill: "white" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "div",
+                {
+                  className: "screenshot-content",
+                  style: {
+                    aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
+                    width: `min(100%, ${333 * screenshotAspectRatio}px)`
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("img", { className: "screenshot-image", src: selectedStep.image, alt: `Captura da etapa ${steps.indexOf(selectedStep) + 1}` }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "click-marker", style: { left: `${selectedStep.click.x * 100}%`, top: `${selectedStep.click.y * 100}%` }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(MousePointer2, { size: 17, fill: "white" }) })
+                  ]
+                }
+              ),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "capture-label", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx(Camera, { size: 13 }),
                 " CAPTURA DE TELA"

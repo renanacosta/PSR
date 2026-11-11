@@ -10,22 +10,28 @@ function sendStatus() {
 }
 async function captureClick(event) {
   if (!isRecording || !mainWindow || mainWindow.isDestroyed()) return;
-  const point = electron.screen.getCursorScreenPoint();
+  const nativePoint = { x: event.x, y: event.y };
+  const point = process.platform === "win32" || process.platform === "linux" ? electron.screen.screenToDipPoint(nativePoint) : electron.screen.getCursorScreenPoint();
   const bounds = mainWindow.getBounds();
   if (point.x >= bounds.x && point.x < bounds.x + bounds.width && point.y >= bounds.y && point.y < bounds.y + bounds.height) return;
   try {
     const display = electron.screen.getDisplayNearestPoint(point);
+    const physicalBounds = process.platform === "win32" ? electron.screen.dipToScreenRect(null, display.bounds) : display.bounds;
+    const clickPoint = process.platform === "win32" ? nativePoint : point;
     const sources = await electron.desktopCapturer.getSources({
       types: ["screen"],
       thumbnailSize: { width: 1600, height: 1e3 }
     });
-    const source = sources.find((item) => item.display_id === String(display.id)) ?? sources[0];
-    if (!source || source.thumbnail.isEmpty()) return;
+    const source = sources.find((item) => item.display_id === String(display.id));
+    if (!source) throw new Error(`Não foi possível localizar a captura do monitor ${display.id}.`);
+    if (source.thumbnail.isEmpty()) return;
+    const imageSize = source.thumbnail.getSize();
     const step = {
       id: `${Date.now()}-${nextStepNumber}`,
       number: nextStepNumber++,
       capturedAt: (/* @__PURE__ */ new Date()).toISOString(),
       image: source.thumbnail.toDataURL(),
+      imageSize: { width: imageSize.width, height: imageSize.height },
       display: {
         x: display.bounds.x,
         y: display.bounds.y,
@@ -33,8 +39,8 @@ async function captureClick(event) {
         height: display.bounds.height
       },
       click: {
-        x: Math.max(0, Math.min(1, (point.x - display.bounds.x) / display.bounds.width)),
-        y: Math.max(0, Math.min(1, (point.y - display.bounds.y) / display.bounds.height)),
+        x: Math.max(0, Math.min(1, (clickPoint.x - physicalBounds.x) / physicalBounds.width)),
+        y: Math.max(0, Math.min(1, (clickPoint.y - physicalBounds.y) / physicalBounds.height)),
         button: event.button === 2 ? "direito" : event.button === 3 ? "meio" : "esquerdo"
       },
       note: ""

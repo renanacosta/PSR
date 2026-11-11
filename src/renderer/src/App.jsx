@@ -47,6 +47,10 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [notice, setNotice] = useState('')
   const selectedStep = steps.find((step) => step.id === selectedId) ?? steps.at(-1)
+  const selectedImageSize = selectedStep?.imageSize ?? selectedStep?.display
+  const screenshotAspectRatio = selectedImageSize
+    ? selectedImageSize.width / selectedImageSize.height
+    : 1
 
   useEffect(() => {
     const removeStepListener = window.psr.onStep((step) => {
@@ -203,8 +207,16 @@ export default function App() {
             {selectedStep ? (
               <>
                 <div className="screenshot-frame">
-                  <img className="screenshot-image" src={selectedStep.image} alt={`Captura da etapa ${steps.indexOf(selectedStep) + 1}`} />
-                  <span className="click-marker" style={{ left: `${selectedStep.click.x * 100}%`, top: `${selectedStep.click.y * 100}%` }}><MousePointer2 size={17} fill="white" /></span>
+                  <div
+                    className="screenshot-content"
+                    style={{
+                      aspectRatio: `${selectedImageSize.width} / ${selectedImageSize.height}`,
+                      width: `min(100%, ${333 * screenshotAspectRatio}px)`,
+                    }}
+                  >
+                    <img className="screenshot-image" src={selectedStep.image} alt={`Captura da etapa ${steps.indexOf(selectedStep) + 1}`} />
+                    <span className="click-marker" style={{ left: `${selectedStep.click.x * 100}%`, top: `${selectedStep.click.y * 100}%` }}><MousePointer2 size={17} fill="white" /></span>
+                  </div>
                   <span className="capture-label"><Camera size={13} /> CAPTURA DE TELA</span>
                 </div>
                 <div className="capture-meta"><span>Clique {selectedStep.click.button}</span><span>{new Date(selectedStep.capturedAt).toLocaleString('pt-BR')}</span></div>

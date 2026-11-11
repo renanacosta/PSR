@@ -515,11 +515,15 @@ h2 {
     border-radius: 3px;
 }
 
+.screenshot-content {
+    position: relative;
+    max-width: 100%;
+}
+
 .screenshot-image {
     display: block;
     width: 100%;
-    max-height: 335px;
-    object-fit: contain;
+    height: 100%;
 }
 
 .click-marker {
